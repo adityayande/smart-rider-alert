@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const temperatureDisplay = document.getElementById('temperatureDisplay');
     const weatherDescDisplay = document.getElementById('weatherDescDisplay');
     const weatherAlert = document.getElementById('weatherAlert');
+    const locationDisplay = document.getElementById('locationDisplay');
     
     const simControls = document.getElementById('simControls');
     const simSpeedSlider = document.getElementById('simSpeed');
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let speedLimit = parseInt(speedLimitSlider.value);
     let isAlarming = false;
     let isRealTimeMode = false;
+    let currentCityName = "Simulation Area";
     
     let gpsWatchId = null;
     let lastWeatherFetchTime = 0;
@@ -176,6 +178,27 @@ document.addEventListener('DOMContentLoaded', () => {
         envStatusBadge.innerText = "FETCHING RADAR...";
         
         try {
+            // 1. Fetch Exact Street-Level Address (Reverse Geocoding via OpenStreetMap)
+            try {
+                const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`);
+                const geoData = await geoResponse.json();
+                if (geoData && geoData.address) {
+                    const addr = geoData.address;
+                    let specificLocation = [];
+                    // Grab exact street, neighborhood, and city if available
+                    if (addr.road) specificLocation.push(addr.road);
+                    if (addr.neighbourhood || addr.suburb) specificLocation.push(addr.neighbourhood || addr.suburb);
+                    if (addr.city || addr.town || addr.village) specificLocation.push(addr.city || addr.town || addr.village);
+                    
+                    currentCityName = specificLocation.length > 0 ? specificLocation.join(", ") : "Exact Location Found";
+                } else {
+                    currentCityName = "Location Locked";
+                }
+            } catch (e) {
+                currentCityName = "GPS Active";
+            }
+
+            // 2. Fetch Weather Data
             const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`);
             const data = await response.json();
             
@@ -227,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         weatherIconDisplay.className = `bx ${iconClass}`;
         weatherIconDisplay.style.color = color;
         weatherDescDisplay.innerText = text;
+        locationDisplay.innerText = currentCityName;
         window.document.documentElement.style.setProperty('--accent-yellow', color);
     }
 
@@ -240,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleSimulatedWeather(type) {
+        currentCityName = "Simulation Area";
         // Just mappings for the sim buttons
         if(type === 'Sun') processWmoCode(0, 32);
         if(type === 'Rain') processWmoCode(63, 22);
