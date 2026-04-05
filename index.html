@@ -1,0 +1,123 @@
+<!DOCTYPE strict>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Rider Dashboard (Real-Time)</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <!-- Header -->
+        <header class="top-bar glass">
+            <div class="logo">
+                <i class='bx bx-radar'></i> SMART<strong>RIDER</strong> OS
+            </div>
+            
+            <div class="header-controls">
+                <!-- Theme Toggle -->
+                <button id="themeToggle" class="theme-btn" title="Toggle Theme">
+                    <i class='bx bx-sun'></i>
+                </button>
+
+                <!-- Mode Toggle -->
+                <div class="mode-toggle">
+                    <span>Simulation</span>
+                    <label class="switch">
+                        <input type="checkbox" id="realGpsToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="realtime-badge">REAL-TIME DB</span>
+                </div>
+
+                <div class="status-indicators">
+                    <span class="status-dot green pulse" id="sysStatusDot"></span> 
+                    <span id="sysStatusText">System Online</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- SPEEDOMETER PANEL -->
+            <section class="panel speed-panel glass" id="speedPanel">
+                <div class="panel-header">
+                    <h2>TELEMETRY <span id="gpsStatusBadge" class="hidden">GPS SIGNAL: SEARCHING...</span></h2>
+                </div>
+                
+                <div class="speed-display">
+                    <div class="speed-value" id="currentSpeedDisplay">0</div>
+                    <div class="speed-unit">KM/H</div>
+                </div>
+
+                <div class="limit-setter">
+                    <label for="speedLimit">Set Speed Limit (<span id="limitValueDisplay">60</span> km/h)</label>
+                    <input type="range" id="speedLimit" min="10" max="150" value="60">
+                </div>
+                
+                <div id="speedWarning" class="warning-banner hidden">
+                    <i class='bx bx-error-circle'></i> HIGH SPEED ALERT!
+                </div>
+            </section>
+
+
+            <!-- WEATHER PANEL -->
+            <section class="panel weather-panel glass">
+                <div class="panel-header">
+                    <h2>ENVIRONMENT <span id="envStatusBadge" class="hidden">LIVE RADAR</span></h2>
+                </div>
+                
+                <div class="weather-current">
+                    <div class="weather-icon">
+                        <i class='bx bx-sun' id="weatherIconDisplay"></i>
+                    </div>
+                    <div class="temp-display">
+                        <span id="temperatureDisplay">--</span><span class="temp-unit">°C</span>
+                    </div>
+                </div>
+                
+                <div class="weather-location" style="color: var(--accent-blue); font-size: 0.9rem; margin-top: -10px; margin-bottom: 5px; font-weight: bold; text-transform: uppercase;">
+                    <i class='bx bx-map'></i> <span id="locationDisplay">Unknown Location</span>
+                </div>
+                <div class="weather-desc" id="weatherDescDisplay">Awaiting Sensor Data</div>
+
+                <div id="weatherAlert" class="warning-banner hidden weather-warning">
+                    <i class='bx bxs-cloud-rain'></i> BAD WEATHER AHEAD!
+                </div>
+            </section>
+
+        </main>
+
+        <!-- DEVELOPER SIMULATION CONTROLS -->
+        <div class="dev-controls" id="simControls">
+            <h3>Simulation Panel (Override)</h3>
+            <p>Controls are ignored when Real-Time DB is active.</p>
+            
+            <div class="control-group">
+                <label>Simulate Speed (Current: <span id="simSpeedVal">0</span>)</label>
+                <input type="range" id="simSpeed" min="0" max="180" value="0">
+            </div>
+
+            <div class="control-group">
+                <label>Simulate Weather</label>
+                <div class="button-group">
+                    <button id="btnSun" class="active">Sunny</button>
+                    <button id="btnRain">Heavy Rain</button>
+                    <button id="btnStorm">Thunderstorm</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Audio for the high speed alert -->
+    <audio id="alertSound" loop preload="auto"></audio>
+
+    <script src="app.js"></script>
+</body>
+</html>
