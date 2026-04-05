@@ -178,13 +178,24 @@ document.addEventListener('DOMContentLoaded', () => {
         envStatusBadge.innerText = "FETCHING RADAR...";
         
         try {
-            // 1. Fetch City Name (Reverse Geocoding)
+            // 1. Fetch Exact Street-Level Address (Reverse Geocoding via OpenStreetMap)
             try {
-                const geoResponse = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+                const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`);
                 const geoData = await geoResponse.json();
-                currentCityName = geoData.city || geoData.locality || "Rural Area";
+                if (geoData && geoData.address) {
+                    const addr = geoData.address;
+                    let specificLocation = [];
+                    // Grab exact street, neighborhood, and city if available
+                    if (addr.road) specificLocation.push(addr.road);
+                    if (addr.neighbourhood || addr.suburb) specificLocation.push(addr.neighbourhood || addr.suburb);
+                    if (addr.city || addr.town || addr.village) specificLocation.push(addr.city || addr.town || addr.village);
+                    
+                    currentCityName = specificLocation.length > 0 ? specificLocation.join(", ") : "Exact Location Found";
+                } else {
+                    currentCityName = "Location Locked";
+                }
             } catch (e) {
-                currentCityName = "GPS Location";
+                currentCityName = "GPS Active";
             }
 
             // 2. Fetch Weather Data
